@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ACX — Plateforme de gestion scolaire au Maroc</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=Syne:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+<style>
+  :root {
+    --blue: #2563EB;
+    --blue-dark: #1E3A8A;
+    --blue-darker: #172554;
+    --blue-light: #EFF6FF;
+    --blue-mid: #DBEAFE;
+    --blue-soft: #BFDBFE;
+    --red: #EF4444;
+    --red-dark: #DC2626;
+    --red-light: #FEF2F2;
+    --red-mid: #FCA5A5;
+    --white: #ffffff;
+    --gray-50: #F8FAFC;
+    --gray-100: #F1F5F9;
+    --gray-200: #E2E8F0;
+    --gray-400: #94A3B8;
+    --gray-600: #475569;
+    --gray-800: #1E293B;
+    --gray-900: #0F172A;
+    --text: #0F172A;
+    --text-muted: #64748B;
+    --radius: 10px;
+    --radius-lg: 14px;
+    --font-display: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font-body);
+    color: var(--text);
+    background: #fff;
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--blue-darker);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2.5rem;
+    height: 60px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .logo {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: -0.5px;
+  }
+  .logo span { color: var(--red); }
+
+  .nav-links {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+  }
+  .nav-links a {
+    font-size: 14px;
+    color: var(--blue-soft);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+  .nav-links a:hover { color: #fff; }
+
+  .nav-actions { display: flex; gap: 10px; align-items: center; }
+
+  .btn-ghost {
+    background: transparent;
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.25);
+    padding: 7px 18px;
+    border-radius: var(--radius);
+    font-size: 14px;
+    font-family: var(--font-body);
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .btn-ghost:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.4); }
+
+  .btn-red {
+    background: var(--red);
+    color: #fff;
+    border: none;
+    padding: 7px 18px;
+    border-radius: var(--radius);
+    font-size: 14px;
+    font-family: var(--font-body);
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-red:hover { background: var(--red-dark); }
+
+  /* ── TRUST BAR ── */
+  .trust-bar {
+    background: var(--blue-light);
+    border-bottom: 1px solid var(--blue-mid);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2.5rem;
+    padding: 10px 2rem;
+    flex-wrap: wrap;
+  }
+  .trust-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--blue-dark);
+    font-weight: 500;
+  }
+  .trust-item i { font-size: 16px; }
+
+  /* ── HERO ── */
+  .hero {
+    text-align: center;
+    padding: 5rem 2rem 4rem;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--blue-mid);
+    color: var(--blue-dark);
+    border: 1px solid var(--blue-soft);
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    margin-bottom: 1.5rem;
+  }
+
+  .hero h1 {
+    font-family: var(--font-display);
+    font-size: 48px;
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -1.5px;
+    margin-bottom: 1.25rem;
+    color: var(--gray-900);
+  }
+  .hero h1 em { font-style: normal; color: var(--blue); }
+
+  .hero p {
+    font-size: 17px;
+    color: var(--text-muted);
+    line-height: 1.7;
+    margin-bottom: 2.25rem;
+    max-width: 520px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .hero-ctas {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+  }
+
+  .btn-primary-lg {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--red);
+    color: #fff;
+    border: none;
+    padding: 13px 26px;
+    border-radius: var(--radius);
+    font-size: 15px;
+    font-family: var(--font-body);
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .btn-primary-lg:hover { background: var(--red-dark); transform: translateY(-1px); }
+
+  .btn-outline-lg {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    color: var(--gray-800);
+    border: 1px solid var(--gray-200);
+    padding: 13px 26px;
+    border-radius: var(--radius);
+    font-size: 15px;
+    font-family: var(--font-body);
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .btn-outline-lg:hover { background: var(--gray-50); border-color: var(--gray-400); }
+
+  .hero-note {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  /* ── DASHBOARD PREVIEW ── */
+  .preview-wrap {
+    margin: 0 2rem 0;
+    background: var(--gray-100);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+
+  .preview-topbar {
+    background: var(--blue-darker);
+    padding: 12px 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .preview-topbar .logo-sm {
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+  }
+  .preview-topbar .logo-sm span { color: var(--red); }
+  .preview-topbar .school-name {
+    font-size: 13px;
+    color: var(--blue-soft);
+    margin-left: 8px;
+    font-weight: 400;
+  }
+  .preview-topbar .year-info { font-size: 12px; color: var(--blue-soft); }
+
+  .preview-inner { padding: 1.25rem; }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .stat-card {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    padding: 0.875rem 1rem;
+  }
+  .stat-label { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
+  .stat-value { font-size: 24px; font-weight: 500; color: var(--gray-900); line-height: 1; }
+  .stat-sub { font-size: 11px; margin-top: 4px; }
+  .stat-sub.blue { color: var(--blue); }
+  .stat-sub.red { color: var(--red); }
+
+  .dash-row {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 10px;
+  }
+
+  .dash-panel {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    padding: 0.875rem 1rem;
+  }
+  .panel-title { font-size: 12px; font-weight: 500; color: var(--text-muted); margin-bottom: 0.75rem; }
+
+  .list-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--gray-100);
+    font-size: 12px;
+    color: var(--gray-800);
+  }
+  .list-item:last-child { border-bottom: none; }
+  .li-left { display: flex; align-items: center; gap: 8px; }
+
+  .avatar {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: var(--blue-mid);
+    color: var(--blue-dark);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 500; flex-shrink: 0;
+  }
+
+  .pill {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+  .pill-blue { background: var(--blue-mid); color: var(--blue-dark); }
+  .pill-red  { background: var(--red-light); color: var(--red-dark); }
+  .pill-amber { background: #FEF3C7; color: #92400E; }
+
+  .bar-row {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 8px; font-size: 11px;
+  }
+  .bar-label { width: 66px; color: var(--text-muted); text-align: right; flex-shrink: 0; }
+  .bar-track { flex: 1; height: 8px; background: var(--gray-100); border-radius: 4px; overflow: hidden; }
+  .bar-fill { height: 100%; background: var(--blue); border-radius: 4px; }
+  .bar-pct { width: 32px; color: var(--text-muted); }
+
+  /* ── SECTIONS ── */
+  section { padding: 4rem 2.5rem; }
+  .section-inner { max-width: 1000px; margin: 0 auto; }
+
+  .section-eyebrow {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--blue);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-size: 30px;
+    font-weight: 600;
+    letter-spacing: -0.75px;
+    margin-bottom: 0.75rem;
+    color: var(--gray-900);
+  }
+  .section-sub {
+    font-size: 16px;
+    color: var(--text-muted);
+    line-height: 1.7;
+    max-width: 500px;
+  }
+
+  hr.divider {
+    border: none;
+    border-top: 1px solid var(--gray-200);
+    margin: 0 2.5rem;
+  }
+
+  /* ── FEATURES ── */
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-top: 2rem;
+  }
+
+  .feat-card {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    padding: 1.375rem;
+    transition: border-color 0.15s, transform 0.15s;
+  }
+  .feat-card:hover { border-color: var(--blue-soft); transform: translateY(-2px); }
+
+  .feat-icon {
+    width: 40px; height: 40px;
+    border-radius: var(--radius);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    margin-bottom: 0.875rem;
+  }
+  .feat-icon.blue { background: var(--blue-mid); color: var(--blue); }
+  .feat-icon.red  { background: var(--red-light); color: var(--red); }
+
+  .feat-title { font-size: 14px; font-weight: 500; margin-bottom: 5px; color: var(--gray-900); }
+  .feat-desc  { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+
+  /* ── PRICING ── */
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-top: 2rem;
+  }
+
+  .price-card {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+  }
+  .price-card.featured { border: 2px solid var(--blue); }
+
+  .price-badge {
+    display: inline-block;
+    font-size: 11px;
+    background: var(--blue-mid);
+    color: var(--blue-dark);
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-bottom: 0.75rem;
+    font-weight: 500;
+  }
+
+  .price-name { font-size: 13px; color: var(--text-muted); font-weight: 500; margin-bottom: 0.5rem; }
+  .price-val  { font-family: var(--font-display); font-size: 30px; font-weight: 600; letter-spacing: -1px; color: var(--gray-900); }
+  .price-val span { font-size: 14px; font-weight: 400; color: var(--text-muted); font-family: var(--font-body); }
+  .price-desc { font-size: 12px; color: var(--text-muted); margin: 6px 0 1rem; }
+
+  .price-list { list-style: none; font-size: 13px; display: flex; flex-direction: column; gap: 8px; }
+  .price-list li { display: flex; align-items: center; gap: 7px; color: var(--gray-600); }
+  .price-list li i { color: var(--blue); font-size: 15px; }
+
+  .btn-price-outline {
+    width: 100%;
+    margin-top: 1.5rem;
+    padding: 10px;
+    font-size: 14px;
+    font-family: var(--font-body);
+    border: 1px solid var(--gray-200);
+    background: transparent;
+    color: var(--gray-800);
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .btn-price-outline:hover { background: var(--gray-50); border-color: var(--gray-400); }
+
+  .btn-price-primary {
+    width: 100%;
+    margin-top: 1.5rem;
+    padding: 10px;
+    font-size: 14px;
+    font-family: var(--font-body);
+    border: none;
+    background: var(--blue);
+    color: #fff;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.15s;
+  }
+  .btn-price-primary:hover { background: var(--blue-dark); }
+
+  /* ── TESTIMONIALS ── */
+  .testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-top: 2rem;
+  }
+
+  .testi-card {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    padding: 1.375rem;
+  }
+
+  .stars { color: var(--red); font-size: 13px; letter-spacing: 1px; margin-bottom: 0.75rem; }
+  .testi-text { font-size: 13px; color: var(--gray-600); line-height: 1.7; margin-bottom: 1rem; }
+  .testi-author { display: flex; align-items: center; gap: 10px; }
+  .testi-name { font-size: 13px; font-weight: 500; color: var(--gray-900); }
+  .testi-role { font-size: 11px; color: var(--text-muted); }
+
+  .avatar-lg {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: var(--blue-mid);
+    color: var(--blue-dark);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 500; flex-shrink: 0;
+  }
+
+  /* ── CTA FINALE ── */
+  .cta-section {
+    background: var(--blue-darker);
+    border-radius: var(--radius-lg);
+    margin: 0 2.5rem 3rem;
+    padding: 3.5rem 2rem;
+    text-align: center;
+  }
+
+  .cta-section h2 {
+    font-family: var(--font-display);
+    font-size: 32px;
+    font-weight: 600;
+    letter-spacing: -1px;
+    margin-bottom: 0.75rem;
+    color: #fff;
+  }
+
+  .cta-section p {
+    font-size: 16px;
+    color: var(--blue-soft);
+    margin-bottom: 2rem;
+  }
+
+  .cta-btns {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  /* Bouton principal CTA — rouge avec texte blanc */
+  .btn-cta-red {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--red);
+    color: #fff;
+    border: none;
+    padding: 13px 26px;
+    border-radius: var(--radius);
+    font-size: 15px;
+    font-family: var(--font-body);
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-cta-red:hover { background: var(--red-dark); }
+
+  /* Bouton secondaire CTA — contour blanc avec texte blanc */
+  .btn-cta-white {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.35);
+    padding: 13px 26px;
+    border-radius: var(--radius);
+    font-size: 15px;
+    font-family: var(--font-body);
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .btn-cta-white:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.6); }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--gray-200);
+    padding: 1.5rem 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .footer-logo {
+    font-family: var(--font-display);
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--gray-900);
+  }
+  .footer-logo span { color: var(--red); }
+
+  .footer-links {
+    display: flex;
+    gap: 1.5rem;
+    list-style: none;
+  }
+  .footer-links a {
+    font-size: 13px;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+  .footer-links a:hover { color: var(--gray-900); }
+
+  .footer-copy {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">AC<span>X</span></div>
+  <ul class="nav-links">
+    <li><a href="#features">Fonctionnalités</a></li>
+    <li><a href="#pricing">Tarifs</a></li>
+    <li><a href="#testimonials">Témoignages</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <div class="nav-actions">
+    <button class="btn-ghost">Connexion</button>
+    <button class="btn-red">Essai gratuit</button>
+  </div>
+</nav>
+
+<!-- TRUST BAR -->
+<div class="trust-bar">
+  <div class="trust-item"><i class="ti ti-shield-check"></i> Données hébergées au Maroc</div>
+  <div class="trust-item"><i class="ti ti-clock"></i> Opérationnel en 48h</div>
+  <div class="trust-item"><i class="ti ti-device-mobile"></i> Web + Mobile iOS & Android</div>
+  <div class="trust-item"><i class="ti ti-headset"></i> Support WhatsApp inclus</div>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge"><i class="ti ti-map-pin"></i> Conçu pour les écoles privées au Maroc</div>
+  <h1>Gérez votre école.<br><em>Pas vos tableurs.</em></h1>
+  <p>ACX centralise absences, notes, bulletins, paiements et communication parents dans une seule plateforme. Simple, rapide, made for Morocco.</p>
+  <div class="hero-ctas">
+    <button class="btn-primary-lg"><i class="ti ti-rocket"></i> Démarrer gratuitement — 30 jours</button>
+    <button class="btn-outline-lg"><i class="ti ti-player-play"></i> Voir la démo</button>
+  </div>
+  <p class="hero-note">Sans carte bancaire · Sans engagement · Annulation à tout moment</p>
+</div>
+
+<!-- DASHBOARD PREVIEW -->
+<div class="preview-wrap">
+  <div class="preview-topbar">
+    <div>
+      <span class="logo-sm">AC<span>X</span></span>
+      <span class="school-name">· Groupe scolaire Al Wifaq</span>
+    </div>
+    <span class="year-info">Année scolaire 2024–25 · Juin 2025</span>
+  </div>
+  <div class="preview-inner">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Élèves inscrits</div>
+        <div class="stat-value">487</div>
+        <div class="stat-sub blue">+12 ce mois</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Paiements reçus</div>
+        <div class="stat-value">94%</div>
+        <div class="stat-sub red">28 impayés</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Taux de présence</div>
+        <div class="stat-value">96.2%</div>
+        <div class="stat-sub blue">Cette semaine</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Bulletins générés</div>
+        <div class="stat-value">487</div>
+        <div class="stat-sub blue">T2 clôturé</div>
+      </div>
+    </div>
+    <div class="dash-row">
+      <div class="dash-panel">
+        <div class="panel-title">Dernières absences signalées</div>
+        <div class="list-item">
+          <div class="li-left"><div class="avatar">AM</div>Amine Moutawakkil</div>
+          <span class="pill pill-amber">Non justifiée</span>
+        </div>
+        <div class="list-item">
+          <div class="li-left"><div class="avatar">SR</div>Sara Rahmouni</div>
+          <span class="pill pill-blue">Justifiée</span>
+        </div>
+        <div class="list-item">
+          <div class="li-left"><div class="avatar">KB</div>Karim Benali</div>
+          <span class="pill pill-red">3ème absence</span>
+        </div>
+        <div class="list-item">
+          <div class="li-left"><div class="avatar">NE</div>Nadia El Fassi</div>
+          <span class="pill pill-blue">Justifiée</span>
+        </div>
+      </div>
+      <div class="dash-panel">
+        <div class="panel-title">Paiements par niveau</div>
+        <div class="bar-row">
+          <div class="bar-label">Primaire</div>
+          <div class="bar-track"><div class="bar-fill" style="width:97%"></div></div>
+          <div class="bar-pct">97%</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">Collège</div>
+          <div class="bar-track"><div class="bar-fill" style="width:92%"></div></div>
+          <div class="bar-pct">92%</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">Lycée</div>
+          <div class="bar-track"><div class="bar-fill" style="width:88%"></div></div>
+          <div class="bar-pct">88%</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">Maternelle</div>
+          <div class="bar-track"><div class="bar-fill" style="width:100%"></div></div>
+          <div class="bar-pct">100%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider" style="margin-top: 3rem;">
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="section-inner">
+    <div class="section-eyebrow">Fonctionnalités</div>
+    <div class="section-title">Tout ce dont votre école a besoin</div>
+    <div class="section-sub">De la gestion des élèves aux bulletins PDF, ACX couvre l'ensemble du cycle de vie scolaire.</div>
+    <div class="features-grid">
+      <div class="feat-card">
+        <div class="feat-icon blue"><i class="ti ti-users"></i></div>
+        <div class="feat-title">Gestion des élèves</div>
+        <div class="feat-desc">Dossiers complets, inscriptions, historique de scolarité et archivage annuel automatisé.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon red"><i class="ti ti-file-text"></i></div>
+        <div class="feat-title">Notes & bulletins PDF</div>
+        <div class="feat-desc">Saisie des notes, calcul des moyennes, génération automatique des bulletins imprimables.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon blue"><i class="ti ti-calendar"></i></div>
+        <div class="feat-title">Emplois du temps</div>
+        <div class="feat-desc">Création et gestion des plannings par classe et par enseignant, exportables en PDF.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon red"><i class="ti ti-credit-card"></i></div>
+        <div class="feat-title">Suivi des paiements</div>
+        <div class="feat-desc">Frais de scolarité, reçus PDF, relances automatiques et tableau de bord des impayés.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon blue"><i class="ti ti-bell"></i></div>
+        <div class="feat-title">Absences & notifications</div>
+        <div class="feat-desc">Appel en classe, alertes SMS et Email aux parents en temps réel, suivi mensuel.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon red"><i class="ti ti-chart-bar"></i></div>
+        <div class="feat-title">Reporting & analytics</div>
+        <div class="feat-desc">Tableaux de bord interactifs, rapports exportables et indicateurs clés pour la direction.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- PRICING -->
+<section id="pricing">
+  <div class="section-inner">
+    <div class="section-eyebrow">Tarifs</div>
+    <div class="section-title">Simple et transparent</div>
+    <div class="section-sub">Pas de surprises. Un prix fixe par mois selon la taille de votre établissement.</div>
+    <div class="pricing-grid">
+      <div class="price-card">
+        <div class="price-name">Starter</div>
+        <div class="price-val">990 <span>MAD / mois</span></div>
+        <div class="price-desc">Jusqu'à 150 élèves</div>
+        <ul class="price-list">
+          <li><i class="ti ti-check"></i>Gestion élèves & classes</li>
+          <li><i class="ti ti-check"></i>Notes & bulletins</li>
+          <li><i class="ti ti-check"></i>Absences & présences</li>
+          <li><i class="ti ti-check"></i>Support email</li>
+        </ul>
+        <button class="btn-price-outline">Commencer</button>
+      </div>
+      <div class="price-card featured">
+        <div class="price-badge">Plus populaire</div>
+        <div class="price-name">Pro</div>
+        <div class="price-val">1 990 <span>MAD / mois</span></div>
+        <div class="price-desc">Jusqu'à 500 élèves</div>
+        <ul class="price-list">
+          <li><i class="ti ti-check"></i>Tout Starter inclus</li>
+          <li><i class="ti ti-check"></i>Paiements & reçus PDF</li>
+          <li><i class="ti ti-check"></i>Notifications SMS / Email</li>
+          <li><i class="ti ti-check"></i>Portail parents & élèves</li>
+          <li><i class="ti ti-check"></i>Emplois du temps</li>
+          <li><i class="ti ti-check"></i>Support WhatsApp</li>
+        </ul>
+        <button class="btn-price-primary">Commencer</button>
+      </div>
+      <div class="price-card">
+        <div class="price-name">École</div>
+        <div class="price-val" style="font-size:22px;">Sur devis</div>
+        <div class="price-desc">500+ élèves ou groupe scolaire</div>
+        <ul class="price-list">
+          <li><i class="ti ti-check"></i>Tout Pro inclus</li>
+          <li><i class="ti ti-check"></i>Multi-établissements</li>
+          <li><i class="ti ti-check"></i>API & intégrations</li>
+          <li><i class="ti ti-check"></i>Onboarding dédié</li>
+          <li><i class="ti ti-check"></i>SLA garanti</li>
+        </ul>
+        <button class="btn-price-outline">Nous contacter</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- TESTIMONIALS -->
+<section id="testimonials">
+  <div class="section-inner">
+    <div class="section-eyebrow">Témoignages</div>
+    <div class="section-title">Ils ont choisi ACX</div>
+    <div class="testimonials-grid">
+      <div class="testi-card">
+        <div class="stars">★★★★★</div>
+        <div class="testi-text">"ACX a transformé notre gestion quotidienne. Les bulletins qui prenaient 2 semaines se génèrent maintenant en une heure."</div>
+        <div class="testi-author">
+          <div class="avatar-lg">MB</div>
+          <div>
+            <div class="testi-name">M. Bennani</div>
+            <div class="testi-role">Directeur, École Al Amal — Casablanca</div>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="stars">★★★★★</div>
+        <div class="testi-text">"Les parents reçoivent les absences en temps réel. On a réduit de 80% les appels entrants de parents inquiets."</div>
+        <div class="testi-author">
+          <div class="avatar-lg">SR</div>
+          <div>
+            <div class="testi-name">S. Rahmani</div>
+            <div class="testi-role">Directrice pédagogique — Rabat</div>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="stars">★★★★★</div>
+        <div class="testi-text">"Le suivi des paiements est devenu simple. On voit d'un coup d'œil qui a payé, qui est en retard, et on relance en un clic."</div>
+        <div class="testi-author">
+          <div class="avatar-lg">KE</div>
+          <div>
+            <div class="testi-name">K. El Idrissi</div>
+            <div class="testi-role">Gérant, Groupe scolaire — Marrakech</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA FINALE -->
+<div class="cta-section">
+  <h2>Prêt à digitaliser votre école ?</h2>
+  <p>30 jours d'essai gratuit. Sans carte bancaire. Sans engagement.</p>
+  <div class="cta-btns">
+    <button class="btn-cta-red"><i class="ti ti-rocket"></i> Démarrer l'essai gratuit</button>
+    <button class="btn-cta-white"><i class="ti ti-calendar"></i> Réserver une démo</button>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer id="contact">
+  <div class="footer-logo">AC<span>X</span> <span style="font-size:12px;font-weight:400;color:var(--text-muted);font-family:var(--font-body)">© 2025 · acx.ma</span></div>
+  <ul class="footer-links">
+    <li><a href="#features">Fonctionnalités</a></li>
+    <li><a href="#pricing">Tarifs</a></li>
+    <li><a href="#">Confidentialité</a></li>
+    <li><a href="#">Contact</a></li>
+  </ul>
+  <span class="footer-copy">Développé par Formajob  🇲🇦</span>
+</footer>
+
+</body>
+</html>
