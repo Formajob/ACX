@@ -31,7 +31,8 @@ export default function ElevesClient({ eleves }: Props) {
 
   const filtered = eleves.filter((e) => {
     const matchSearch = e.full_name.toLowerCase().includes(search.toLowerCase())
-    const classe = e.class_students?.[0]?.classes
+    const classeData = e.class_students?.[0]
+const classe = classeData ? (classeData as any).classes : null
     const matchLevel = filterLevel === 'tous' || classe?.level === filterLevel
     return matchSearch && matchLevel
   })
