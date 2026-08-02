@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase-browser'
 
 const navItems = [
   { href: '/dashboard',           icon: 'ti-home',         label: 'Tableau de bord' },
+  { href: '/dashboard/presence', icon: 'ti-fingerprint', label: 'Presence profs' },
   { href: '/dashboard/eleves',    icon: 'ti-users',        label: 'Élèves' },
   { href: '/dashboard/classes',   icon: 'ti-school',       label: 'Classes' },
   { href: '/dashboard/notes',     icon: 'ti-file-text',    label: 'Notes & Bulletins' },

@@ -51,42 +51,41 @@ export default function LoginPage() {
   }
 
   async function handleLogin() {
-    if (!selectedSchool) return
-    setLoading(true)
-    setError('')
+  if (!selectedSchool) return
+  setLoading(true)
+  setError('')
 
-    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
+  // MODE TEST — cherche directement dans la table users sans auth
+  const { data: userProfile, error: profileError } = await supabase
+    .from('users')
+    .select('id, school_id, role, full_name')
+    .eq('email', email)
+    .eq('school_id', selectedSchool.id)
+    .maybeSingle()
 
-    if (authError || !authData.user) {
-      setError('Email ou mot de passe incorrect')
-      setLoading(false)
-      return
-    }
+  if (profileError || !userProfile) {
+    setError('Email introuvable dans cette ecole')
+    setLoading(false)
+    return
+  }
 
-    const { data: userProfile } = await supabase
-      .from('users')
-      .select('school_id, role')
-      .eq('id', authData.user.id)
-      .single()
+  // Stocker le profil dans localStorage pour simuler une session
+  localStorage.setItem('acx_user', JSON.stringify({
+    id: userProfile.id,
+    email: email,
+    role: userProfile.role,
+    full_name: userProfile.full_name,
+    school_id: userProfile.school_id,
+  }))
 
-    if (!userProfile) {
-      setError('Profil utilisateur introuvable')
-      setLoading(false)
-      return
-    }
-
-    if (userProfile.school_id !== selectedSchool.id) {
-      setError('Vous n avez pas acces a cette ecole')
-      await supabase.auth.signOut()
-      setLoading(false)
-      return
-    }
-
+  if (userProfile.role === 'teacher') {
+    router.push('/professeur')
+  } else if (userProfile.role === 'parent') {
+    router.push('/parent')
+  } else {
     router.push('/dashboard')
   }
+}
 
   const containerStyle = {
     minHeight: '100vh',
