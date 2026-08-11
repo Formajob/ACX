@@ -1,59 +1,68 @@
-import { createClient } from '@/lib/supabase-server'
+'use client'
 
-export default async function ProfEmploisPage() {
-  const supabase = await createClient()
+import { useEffect, useState } from 'react'
+import { createClient } from '@/lib/supabase-browser'
+import { useRouter } from 'next/navigation'
 
-  const { data: profile } = await supabase
-    .from('users').select('id').eq('role', 'teacher').limit(1).single()
+const DAYS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi']
+const HOURS = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00']
+const COLORS = [
+  { bg: '#EFF6FF', border: '#BFDBFE', text: '#1E3A8A' },
+  { bg: '#ECFDF5', border: '#A7F3D0', text: '#065F46' },
+  { bg: '#FEF3C7', border: '#FDE68A', text: '#92400E' },
+  { bg: '#FEF2F2', border: '#FECACA', text: '#991B1B' },
+  { bg: '#F5F3FF', border: '#DDD6FE', text: '#4C1D95' },
+  { bg: '#FFF7ED', border: '#FED7AA', text: '#9A3412' },
+]
 
-  const { data: slots } = await supabase
-    .from('timetable_slots')
-    .select('*, subjects(name), classes(name, level)')
-    .eq('teacher_id', profile!.id)
-    .order('day_of_week')
+export default function ProfEmploisPage() {
+  const supabase = createClient()
+  const router = useRouter()
+  const [slots, setSlots] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
 
-  const DAYS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi']
-  const HOURS = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00']
-  const COLORS = [
-    { bg: '#EFF6FF', border: '#BFDBFE', text: '#1E3A8A' },
-    { bg: '#ECFDF5', border: '#A7F3D0', text: '#065F46' },
-    { bg: '#FEF3C7', border: '#FDE68A', text: '#92400E' },
-    { bg: '#FEF2F2', border: '#FECACA', text: '#991B1B' },
-    { bg: '#F5F3FF', border: '#DDD6FE', text: '#4C1D95' },
-    { bg: '#FFF7ED', border: '#FED7AA', text: '#9A3412' },
-  ]
+  useEffect(() => {
+    const stored = localStorage.getItem('acx_user')
+    if (!stored) { router.push('/login'); return }
+    const user = JSON.parse(stored)
+    loadData(user.id)
+  }, [])
+
+  async function loadData(userId: string) {
+    const { data } = await supabase
+      .from('timetable_slots')
+      .select('*, subjects(name), classes(name, level)')
+      .eq('teacher_id', userId)
+      .order('day_of_week')
+    setSlots(data ?? [])
+    setLoading(false)
+  }
 
   function getSlot(day: number, hour: string) {
-    return slots?.find(s => s.day_of_week === day + 1 && s.start_time?.slice(0, 5) === hour)
+    return slots.find(s => s.day_of_week === day + 1 && s.start_time?.slice(0, 5) === hour)
   }
 
   function getColor(subjectName: string) {
-    const names = [...new Set(slots?.map((s: any) => s.subjects?.name))]
+    const names = [...new Set(slots.map((s: any) => s.subjects?.name))]
     return COLORS[names.indexOf(subjectName) % COLORS.length]
   }
+
+  if (loading) return <div style={{ padding: '2rem', color: '#94A3B8', fontSize: '14px' }}>Chargement...</div>
 
   return (
     <div style={{ fontFamily: 'DM Sans, sans-serif' }}>
       <div style={{ marginBottom: '1.5rem' }}>
-        <h1 style={{ fontSize: '22px', fontWeight: 600, fontFamily: 'Syne, sans-serif', color: '#0F172A' }}>
-          Mon emploi du temps
-        </h1>
-        <p style={{ fontSize: '14px', color: '#64748B', marginTop: '2px' }}>
-          Planning hebdomadaire — lecture seule
-        </p>
+        <h1 style={{ fontSize: '22px', fontWeight: 600, fontFamily: 'Syne, sans-serif', color: '#0F172A' }}>Mon emploi du temps</h1>
+        <p style={{ fontSize: '14px', color: '#64748B', marginTop: '2px' }}>Planning hebdomadaire — lecture seule</p>
       </div>
 
       <div style={{ background: '#fff', border: '1px solid #E2E8F0', borderRadius: '12px', overflow: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '700px' }}>
           <thead>
             <tr style={{ background: '#F8FAFC' }}>
-              <th style={{ padding: '10px 14px', fontSize: '12px', fontWeight: 500, color: '#64748B', textAlign: 'left', borderBottom: '1px solid #E2E8F0', width: '70px' }}>
-                Heure
-              </th>
+              <th style={{ padding: '10px 14px', fontSize: '12px', fontWeight: 500, color: '#64748B', textAlign: 'left', borderBottom: '1px solid #E2E8F0', width: '70px' }}>Heure</th>
               {DAYS.map(day => (
-                <th key={day} style={{ padding: '10px 14px', fontSize: '12px', fontWeight: 500, color: '#64748B', textAlign: 'center', borderBottom: '1px solid #E2E8F0' }}>
-                  {day}
-                </th>
+                <th key={day} style={{ padding: '10px 14px', fontSize: '12px', fontWeight: 500, color: '#64748B', textAlign: 'center', borderBottom: '1px solid #E2E8F0' }}>{day}</th>
               ))}
             </tr>
           </thead>
@@ -83,7 +92,7 @@ export default async function ProfEmploisPage() {
           </tbody>
         </table>
 
-        {(!slots || slots.length === 0) && (
+        {slots.length === 0 && (
           <div style={{ textAlign: 'center', padding: '3rem', color: '#94A3B8', fontSize: '14px' }}>
             <i className="ti ti-calendar" style={{ fontSize: '32px', display: 'block', marginBottom: '8px' }} />
             Aucun creneau assigne

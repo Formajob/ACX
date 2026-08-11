@@ -1,25 +1,51 @@
-import { createClient } from '@/lib/supabase-server'
+'use client'
+
+import { useEffect, useState } from 'react'
+import { createClient } from '@/lib/supabase-browser'
+import { useRouter } from 'next/navigation'
 import PointageClient from './PointageClient'
 
-export default async function PointagePage() {
-  const supabase = await createClient()
-  const { data: userData } = await supabase.auth.getUser()
+export default function PointagePage() {
+  const supabase = createClient()
+  const router = useRouter()
+  const [teacherId, setTeacherId] = useState<string | null>(null)
+  const [todayAttendance, setTodayAttendance] = useState<any>(null)
+  const [history, setHistory] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
 
-  const today = new Date().toISOString().split('T')[0]
+  useEffect(() => {
+    const stored = localStorage.getItem('acx_user')
+    if (!stored) { router.push('/login'); return }
+    const user = JSON.parse(stored)
+    setTeacherId(user.id)
+    loadData(user.id)
+  }, [])
 
-  const { data: todayAttendance } = await supabase
-    .from('teacher_attendance')
-    .select('*, teacher_attendance_events(*)')
-    .eq('teacher_id', userData.user!.id)
-    .eq('date', today)
-    .maybeSingle()
+  async function loadData(userId: string) {
+    const today = new Date().toISOString().split('T')[0]
 
-  const { data: history } = await supabase
-    .from('teacher_attendance')
-    .select('*, teacher_attendance_events(*)')
-    .eq('teacher_id', userData.user!.id)
-    .order('date', { ascending: false })
-    .limit(10)
+    const [{ data: todayAtt }, { data: hist }] = await Promise.all([
+      supabase
+        .from('teacher_attendance')
+        .select('*, teacher_attendance_events(*)')
+        .eq('teacher_id', userId)
+        .eq('date', today)
+        .maybeSingle(),
+      supabase
+        .from('teacher_attendance')
+        .select('*, teacher_attendance_events(*)')
+        .eq('teacher_id', userId)
+        .order('date', { ascending: false })
+        .limit(10),
+    ])
+
+    setTodayAttendance(todayAtt)
+    setHistory(hist ?? [])
+    setLoading(false)
+  }
+
+  if (loading) return <div style={{ padding: '2rem', color: '#94A3B8', fontSize: '14px' }}>Chargement...</div>
+  if (!teacherId) return null
 
   return (
     <div style={{ fontFamily: 'DM Sans, sans-serif' }}>
@@ -32,9 +58,9 @@ export default async function PointagePage() {
         </p>
       </div>
       <PointageClient
-        teacherId={userData.user!.id}
+        teacherId={teacherId}
         todayAttendance={todayAttendance}
-        history={history ?? []}
+        history={history}
       />
     </div>
   )
