@@ -11,6 +11,7 @@ const navItems = [
   { href: '/professeur/absences', icon: 'ti-calendar-off', label: 'Absences' },
   { href: '/professeur/emplois',  icon: 'ti-calendar',     label: 'Mon planning' },
   { href: '/professeur/pointage', icon: 'ti-fingerprint',  label: 'Mon pointage' },
+  { href: '/professeur/observations', icon: 'ti-notes', label: 'Observations' },
 ]
 
 export default function ProfesseurLayout({ children }: { children: React.ReactNode }) {
