@@ -28,62 +28,77 @@ export default function LoginPage() {
     })
   }, [])
 
-  async function handleLogin() {
-    setLoading(true)
-    setError('')
+ async function handleLogin() {
+  setLoading(true)
+  setError('')
 
-    try {
-      const { data, error: err } = await supabase
-        .from('users')
-        .select('id, school_id, role, full_name, email')
-        .eq('email', email.trim().toLowerCase())
-        .limit(1)
+  try {
+    console.log('=== LOGIN DEBUG ===')
+    console.log('Email saisi:', email.trim().toLowerCase())
+    console.log('School selected:', selectedSchool?.id)
 
-      if (err) {
-        setError('Erreur DB: ' + err.message)
-        setLoading(false)
-        return
-      }
+    const { data: profiles, error: profileError } = await supabase
+      .from('users')
+      .select('id, school_id, role, full_name, email')
+      .eq('email', email.trim().toLowerCase())
+      .limit(1)
 
-      if (!data || data.length === 0) {
-        setError('Email introuvable dans la base')
-        setLoading(false)
-        return
-      }
+    console.log('Query result:', profiles)
+    console.log('Query error:', profileError)
 
-      const u = data[0]
-
-      if (password !== 'acx123456') {
-        setError('Mot de passe incorrect — utilisez acx123456')
-        setLoading(false)
-        return
-      }
-
-      if (u.role !== 'super_admin' && selectedSchool && u.school_id !== selectedSchool.id) {
-        setError('Compte non autorise pour cette ecole — school_id: ' + u.school_id + ' vs ' + selectedSchool?.id)
-        setLoading(false)
-        return
-      }
-
-      const session = {
-        id: u.id,
-        email: u.email,
-        role: u.role,
-        full_name: u.full_name,
-        school_id: u.role === 'super_admin' && selectedSchool ? selectedSchool.id : u.school_id,
-        school_name: selectedSchool?.name ?? '',
-      }
-
-      localStorage.setItem('acx_user', JSON.stringify(session))
-
-      const dest = u.role === 'teacher' ? '/professeur' : u.role === 'parent' ? '/parent' : '/dashboard'
-      window.location.href = dest
-
-    } catch (e: any) {
-      setError('Exception: ' + e.message)
+    if (profileError) {
+      setError('Erreur DB: ' + profileError.message)
       setLoading(false)
+      return
     }
+
+    if (!profiles || profiles.length === 0) {
+      setError('Email introuvable — verifié: ' + email.trim().toLowerCase())
+      setLoading(false)
+      return
+    }
+
+    const u = profiles[0]
+    console.log('User found:', u)
+    console.log('Role:', u.role)
+    console.log('School ID from DB:', u.school_id)
+    console.log('School ID selected:', selectedSchool?.id)
+    console.log('Password check:', password === 'acx123456')
+
+    if (password !== 'acx123456') {
+      setError('Mot de passe incorrect')
+      setLoading(false)
+      return
+    }
+
+    if (u.role !== 'super_admin' && selectedSchool && u.school_id !== selectedSchool.id) {
+      setError('Compte non autorise pour cette ecole. school_id DB: ' + u.school_id + ' | selected: ' + selectedSchool.id)
+      setLoading(false)
+      return
+    }
+
+    const session = {
+      id: u.id,
+      email: u.email,
+      role: u.role,
+      full_name: u.full_name,
+      school_id: u.role === 'super_admin' && selectedSchool ? selectedSchool.id : u.school_id,
+      school_name: selectedSchool?.name ?? '',
+    }
+
+    localStorage.setItem('acx_user', JSON.stringify(session))
+    console.log('Session stored:', session)
+
+    const dest = u.role === 'teacher' ? '/professeur' : u.role === 'parent' ? '/parent' : '/dashboard'
+    console.log('Redirecting to:', dest)
+    window.location.href = dest
+
+  } catch (e: any) {
+    console.error('Exception:', e)
+    setError('Exception: ' + e.message)
+    setLoading(false)
   }
+}
 
   const inputStyle: React.CSSProperties = {
     width: '100%',
