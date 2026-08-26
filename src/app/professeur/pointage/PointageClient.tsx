@@ -121,7 +121,7 @@ export default function PointageClient({ teacherId, todayAttendance, history }: 
     const { data: newEvent } = await supabase
       .from('teacher_attendance_events')
       .insert({
-        teacher_attendance_id: currentAttendance.id,
+        teacher_attendance_id: currentAttendance!.id,
         event_type: eventType,
         note: note || null,
       })
