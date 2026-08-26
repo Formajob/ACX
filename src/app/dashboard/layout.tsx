@@ -15,6 +15,7 @@ const navItems = [
   { href: '/dashboard/paiements', icon: 'ti-credit-card',  label: 'Paiements' },
   { href: '/dashboard/emplois',   icon: 'ti-calendar',     label: 'Emplois du temps' },
   { href: '/dashboard/rapports',  icon: 'ti-chart-bar',    label: 'Rapports' },
+  { href: '/dashboard/annonces', icon: 'ti-speakerphone', label: 'Annonces' },
 ]
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {

@@ -10,6 +10,7 @@ const navItems = [
   { href: '/parent/absences',  icon: 'ti-calendar-off', label: 'Absences' },
   { href: '/parent/paiements', icon: 'ti-credit-card',  label: 'Paiements' },
   { href: '/parent/observations', icon: 'ti-notes', label: 'Observations' },
+  { href: '/parent/annonces', icon: 'ti-speakerphone', label: 'Annonces' },
 ]
 
 export default function ParentLayout({ children }: { children: React.ReactNode }) {
