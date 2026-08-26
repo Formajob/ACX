@@ -15,7 +15,7 @@ interface Student {
   status: string
   has_transport: boolean
   has_canteen: boolean
-  class_students: Array<{ classes: { name: string; level: string } }>
+  class_students: any[]
 }
 
 export default function ElevesPage() {
