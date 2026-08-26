@@ -115,7 +115,7 @@ export default function PointageClient({ teacherId, todayAttendance, history }: 
     if (eventType === 'arrive') {
       await supabase.from('teacher_attendance')
         .update({ status: isLate() ? 'late' : 'present' })
-        .eq('id', currentAttendance.id)
+        .eq('id', currentAttendance!.id)
     }
 
     const { data: newEvent } = await supabase
