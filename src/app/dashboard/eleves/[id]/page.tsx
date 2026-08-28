@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase-browser'
 import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import ObservationsView from '@/components/shared/ObservationsView'
+import StudentFinances from '@/components/shared/StudentFinances'
 
 export default function EleveFichePage() {
   const supabase = createClient()
@@ -300,6 +301,24 @@ export default function EleveFichePage() {
 
         
       )}
+
+      <div style={{ background: '#fff', border: '1px solid #E2E8F0', borderRadius: '12px', padding: '1.25rem', marginTop: '14px', marginBottom: '2rem' }}>
+  <div style={{ fontSize: '13px', fontWeight: 500, color: '#64748B', marginBottom: '1rem' }}>
+    <i className="ti ti-calculator" style={{ marginRight: '6px', color: '#2563EB' }} />
+    Configuration financière
+  </div>
+  <StudentFinances
+    studentId={id}
+    studentName={eleve.full_name}
+    studentLevel={eleve.level ?? ''}
+    parentName={eleve.parent_name}
+    parentPhone={eleve.parent_phone}
+    parentEmail={eleve.parent_email}
+    schoolName="Ecole Al Amal"
+    readOnly={false}
+  />
+</div>
+
     </div>
   )
 }

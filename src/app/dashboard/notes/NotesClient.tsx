@@ -118,7 +118,7 @@ export default function NotesClient({ classes, subjects, grades }: Props) {
     border: '1px solid #E2E8F0',
     borderRadius: '8px',
     fontSize: '14px',
-    fontFamily: 'DM Sans, sans-serif',
+    fontFamily: 'DM Sans, sans-serif',  
     outline: 'none',
     color: '#1E293B',
     background: '#fff',

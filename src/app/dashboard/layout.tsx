@@ -13,6 +13,7 @@ const navItems = [
   { href: '/dashboard/notes',     icon: 'ti-file-text',    label: 'Notes & Bulletins' },
   { href: '/dashboard/absences',  icon: 'ti-calendar-off', label: 'Absences' },
   { href: '/dashboard/paiements', icon: 'ti-credit-card',  label: 'Paiements' },
+  
   { href: '/dashboard/emplois',   icon: 'ti-calendar',     label: 'Emplois du temps' },
   { href: '/dashboard/rapports',  icon: 'ti-chart-bar',    label: 'Rapports' },
   { href: '/dashboard/annonces', icon: 'ti-speakerphone', label: 'Annonces' },
