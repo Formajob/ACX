@@ -8,9 +8,10 @@ interface Props {
   teachers: any[]
   todayAttendances: any[]
   alerts: any[]
+  schoolId: string | null
 }
 
-export default function PresenceAdminWrapper({ teachers, todayAttendances, alerts }: Props) {
+export default function PresenceAdminWrapper({ teachers, todayAttendances, alerts, schoolId }: Props) {
   const [mainTab, setMainTab] = useState<'presence' | 'rapport'>('presence')
 
   return (
@@ -50,6 +51,7 @@ export default function PresenceAdminWrapper({ teachers, todayAttendances, alert
           teachers={teachers}
           todayAttendances={todayAttendances}
           alerts={alerts}
+          schoolId={schoolId}
         />
       )}
 

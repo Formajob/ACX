@@ -10,7 +10,7 @@ export default async function PresenceAdminPage() {
     { data: todayAttendances },
     { data: alerts },
   ] = await Promise.all([
-    supabase.from('users').select('id, full_name, email').eq('role', 'teacher'),
+    supabase.from('users').select('id, full_name, email, school_id').eq('role', 'teacher'),
     supabase
       .from('teacher_attendance')
       .select('*, users(full_name), teacher_attendance_events(*)')
@@ -21,6 +21,8 @@ export default async function PresenceAdminPage() {
       .eq('read', false)
       .order('created_at', { ascending: false }),
   ])
+
+  const schoolId = teachers?.[0]?.school_id ?? null
 
   return (
     <div style={{ fontFamily: 'DM Sans, sans-serif' }}>
@@ -37,6 +39,7 @@ export default async function PresenceAdminPage() {
         teachers={teachers ?? []}
         todayAttendances={todayAttendances ?? []}
         alerts={alerts ?? []}
+        schoolId={schoolId}
       />
     </div>
   )

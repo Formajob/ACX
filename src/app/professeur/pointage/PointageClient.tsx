@@ -77,14 +77,55 @@ export default function PointageClient({ teacherId, todayAttendance, history }: 
   const isOnPause = events.filter(e => e.event_type === 'pause_debut').length > events.filter(e => e.event_type === 'pause_fin').length
   const isInMeeting = events.filter(e => e.event_type === 'reunion_debut').length > events.filter(e => e.event_type === 'reunion_fin').length
 
-  useEffect(() => {
-    if (!hasArrived || hasDeparted) return
-    const interval = setInterval(() => {
-      const dur = getWorkDuration(events)
-      if (dur !== null) setElapsed(dur)
-    }, 1000)
-    return () => clearInterval(interval)
-  }, [events, hasArrived, hasDeparted])
+  // Presence: signale que le prof a l'app ouverte
+useEffect(() => {
+  let schoolId: string | null = null
+
+  const setup = async () => {
+    const { data } = await supabase.from('users').select('school_id, full_name').eq('id', teacherId).single()
+    schoolId = data?.school_id ?? null
+    if (!schoolId) return
+
+    const channel = supabase.channel(`presence:school-${schoolId}`, {
+      config: { presence: { key: teacherId } },
+    })
+
+    channel.subscribe(async (status) => {
+      if (status === 'SUBSCRIBED') {
+        await channel.track({ teacher_id: teacherId, full_name: data?.full_name, online_at: new Date().toISOString() })
+      }
+    })
+
+    return () => { supabase.removeChannel(channel) }
+  }
+
+  const cleanupPromise = setup()
+  return () => { cleanupPromise.then(fn => fn && fn()) }
+}, [teacherId, supabase])
+
+// Realtime: recoit les tags forces par l'admin, sans reload
+useEffect(() => {
+  if (!attendance?.id) return
+  const channel = supabase
+    .channel(`teacher_attendance_events-${attendance.id}`)
+    .on(
+      'postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'teacher_attendance_events', filter: `teacher_attendance_id=eq.${attendance.id}` },
+      (payload) => {
+        const newEvent = payload.new as Event
+        setAttendance(prev => prev ? {
+          ...prev,
+          teacher_attendance_events: prev.teacher_attendance_events.some(e => e.id === newEvent.id)
+            ? prev.teacher_attendance_events
+            : [...prev.teacher_attendance_events, newEvent],
+        } : prev)
+        if (newEvent.note === 'Modifie par admin') router.refresh()
+      }
+    )
+    .subscribe()
+
+  return () => { supabase.removeChannel(channel) }
+}, [attendance?.id, supabase, router])
 
   async function handleEvent(eventType: string) {
     setLoading(eventType)
