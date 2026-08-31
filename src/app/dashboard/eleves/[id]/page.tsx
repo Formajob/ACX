@@ -216,19 +216,19 @@ export default function EleveFichePage() {
         </div>
       </div>
 
-      {/* Notes trimestres */}
+      {/* Notes semestres */}
       <div style={{ background: '#fff', border: '1px solid #E2E8F0', borderRadius: '12px', padding: '1.25rem', marginTop: '14px' }}>
         <div style={{ fontSize: '13px', fontWeight: 500, color: '#64748B', marginBottom: '1rem' }}>
-          Notes par trimestre
+          Notes par semestre
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
-          {[1, 2, 3].map(term => {
+          {[1, 2].map(term => {
             const tg = grades.filter((g: any) => g.term === term)
             const avg = getAverage(term)
             return (
               <div key={term} style={{ border: '1px solid #E2E8F0', borderRadius: '10px', padding: '1rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-                  <span style={{ fontSize: '13px', fontWeight: 500, color: '#64748B' }}>Trimestre {term}</span>
+                  <span style={{ fontSize: '13px', fontWeight: 500, color: '#64748B' }}>semestre {term}</span>
                   {avg && (
                     <span style={{ fontSize: '16px', fontWeight: 600, color: parseFloat(avg) >= 10 ? '#166534' : '#DC2626' }}>
                       {avg}/20

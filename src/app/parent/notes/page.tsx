@@ -71,14 +71,14 @@ export default function ParentNotesPage() {
     <div style={{ fontFamily: 'DM Sans, sans-serif' }}>
       <div style={{ marginBottom: '1.5rem' }}>
         <h1 style={{ fontSize: '22px', fontWeight: 600, fontFamily: 'Syne, sans-serif', color: '#0F172A' }}>Notes et Bulletins</h1>
-        <p style={{ fontSize: '14px', color: '#64748B', marginTop: '2px' }}>Resultats scolaires par trimestre</p>
+        <p style={{ fontSize: '14px', color: '#64748B', marginTop: '2px' }}>Resultats scolaires par semestre</p>
       </div>
 
-      {/* Sélecteur trimestre */}
+      {/* Sélecteur semestre */}
       <div style={{ display: 'flex', gap: '4px', marginBottom: '1.5rem', background: '#F1F5F9', padding: '4px', borderRadius: '10px', width: 'fit-content' }}>
-        {[1, 2, 3].map(t => (
+        {[1, 2].map(t => (
           <button key={t} onClick={() => setSelectedTerm(t)} style={{ padding: '7px 20px', borderRadius: '7px', border: 'none', fontSize: '13px', fontWeight: 500, fontFamily: 'DM Sans, sans-serif', cursor: 'pointer', background: selectedTerm === t ? '#fff' : 'transparent', color: selectedTerm === t ? '#1E293B' : '#64748B', boxShadow: selectedTerm === t ? '0 1px 3px rgba(0,0,0,0.1)' : 'none' }}>
-            Trimestre {t}
+            semestre {t}
           </button>
         ))}
       </div>
@@ -134,7 +134,7 @@ export default function ParentNotesPage() {
               <div style={{ background: '#fff', border: '1px solid #E2E8F0', borderTop: 'none', borderRadius: '0 0 12px 12px', overflow: 'hidden' }}>
                 {termGrades.length === 0 ? (
                   <div style={{ textAlign: 'center', padding: '2.5rem', color: '#94A3B8', fontSize: '13px' }}>
-                    Aucune note pour le trimestre {selectedTerm}
+                    Aucune note pour le semestre {selectedTerm}
                   </div>
                 ) : (
                   <table style={{ width: '100%', borderCollapse: 'collapse' }}>

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
+import SupportWidget from '@/components/shared/SupportWidget'
 
 const navItems = [
   { href: '/professeur',          icon: 'ti-home',         label: 'Tableau de bord' },
@@ -125,6 +126,8 @@ export default function ProfesseurLayout({ children }: { children: React.ReactNo
             {children}
           </main>
         </div>
+       
+<SupportWidget />
       </div>
     </>
   )

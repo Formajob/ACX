@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
+import SupportWidget from '@/components/shared/SupportWidget'
 
 const navItems = [
   { href: '/parent',           icon: 'ti-home',         label: 'Tableau de bord' },
@@ -90,6 +91,7 @@ export default function ParentLayout({ children }: { children: React.ReactNode }
             {children}
           </main>
         </div>
+        <SupportWidget />
       </div>
     </>
   )

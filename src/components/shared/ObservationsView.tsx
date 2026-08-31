@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase-browser'
+import WhatsAppButton from '@/components/shared/WhatsAppButton'
+import { MESSAGES } from '@/lib/whatsapp'
+
 
 interface Observation {
   id: string
@@ -152,7 +155,7 @@ function MiniChart({ data }: { data: { week: string; note: number; subject: stri
 export default function ObservationsView({
   studentId, readOnly = true,
   classId, teacherId, subjectId, subjectName,
-  studentName, schoolName
+  parentPhone, studentName, schoolName
 }: Props) {
   const supabase = createClient()
   const [observations, setObservations] = useState<Observation[]>([])
@@ -370,6 +373,34 @@ export default function ObservationsView({
           <button onClick={handleSubmit} disabled={saving} style={{ padding: '9px 20px', border: 'none', borderRadius: '8px', background: saving ? '#94A3B8' : '#2563EB', color: '#fff', fontSize: '13px', fontWeight: 500, cursor: saving ? 'not-allowed' : 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
             {saving ? 'Enregistrement...' : 'Enregistrer'}
           </button>
+        </div>
+        
+      )}
+
+      {!readOnly && lastObs?.comment && parentPhone && (
+        <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'flex-end' }}>
+          {(() => {
+            const behaviorKey = lastObs.behavior as keyof typeof BEHAVIOR_CONFIG
+            const behaviorValue = BEHAVIOR_CONFIG[behaviorKey]?.val ?? BEHAVIOR_CONFIG.good.val
+            const safeNote = Number(lastObs.note) || 0
+
+            return (
+              <WhatsAppButton
+                phone={parentPhone}
+                message={MESSAGES.observation(
+                  studentName ?? '',
+                  new Date(lastObs.week_start).toLocaleDateString('fr-MA', { day: 'numeric', month: 'long' }),
+                  safeNote,
+                  behaviorValue,
+                  lastObs.comment ?? '',
+                  schoolName ?? ''
+                )}
+                size="sm"
+                variant="outline"
+                label="Partager avec le parent"
+              />
+            )
+          })()}
         </div>
       )}
 

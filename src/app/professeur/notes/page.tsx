@@ -148,12 +148,11 @@ export default function ProfNotesPage() {
             </select>
           </div>
           <div>
-            <label style={{ fontSize: '13px', fontWeight: 500, color: '#1E293B', display: 'block', marginBottom: '5px' }}>Trimestre</label>
+            <label style={{ fontSize: '13px', fontWeight: 500, color: '#1E293B', display: 'block', marginBottom: '5px' }}>semestre</label>
             <select value={selectedTerm} onChange={e => setSelectedTerm(Number(e.target.value))} style={inputStyle}>
-              <option value={1}>Trimestre 1</option>
-              <option value={2}>Trimestre 2</option>
-              <option value={3}>Trimestre 3</option>
-            </select>
+  <option value={1}>Semestre 1</option>
+  <option value={2}>Semestre 2</option>
+</select>
           </div>
         </div>
       </div>
