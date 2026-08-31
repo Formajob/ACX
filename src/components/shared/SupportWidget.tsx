@@ -64,53 +64,75 @@ export default function SupportWidget() {
     setStep('menu')
   }
 
-  async function sendTicket() {
+    async function sendTicket() {
     if (!form.bug_type || !form.description.trim()) return
     setSending(true)
 
     const roleLabel: Record<string, string> = {
-      admin:       'Administrateur',
+      admin: 'Administrateur',
       super_admin: 'Super Admin',
-      teacher:     'Professeur',
-      parent:      'Parent',
+      teacher: 'Professeur',
+      parent: 'Parent',
     }
 
-    const body = `
-TICKET DE SUPPORT ACX
+    // 1. Préparer les données pour Web3Forms
+    const formData = {
+      access_key: "a037a697-b706-4e18-a945-3a1b664ea8e2", // ⚠️ Remplace par ta clé obtenue à l'étape 1
+      subject: `[ACX${form.urgent ? ' 🚨 URGENT' : ''}] ${BUG_TYPES.find(b => b.value === form.bug_type)?.label} — ${user?.school_name ?? 'Inconnu'}`,
+      from_name: user?.full_name ?? 'Utilisateur ACX',
+      replyto: user?.email ?? 'no-reply@acx.ma',
+      message: `
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-URGENCE : ${form.urgent ? '🚨 OUI — Urgent' : '🟢 Non urgent'}
-
+URGENCE : ${form.urgent ? '🚨 OUI' : '🟢 Non'}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 UTILISATEUR
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Nom        : ${user?.full_name ?? 'Non connecté'}
-Email      : ${user?.email ?? '—'}
-Rôle       : ${roleLabel[user?.role] ?? user?.role ?? '—'}
-École      : ${user?.school_name ?? '—'}
+Nom   : ${user?.full_name ?? 'Non connecté'}
+Email : ${user?.email ?? '—'}
+Rôle  : ${roleLabel[user?.role] ?? user?.role ?? '—'}
+École : ${user?.school_name ?? '—'}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 PROBLÈME
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Type       : ${BUG_TYPES.find(b => b.value === form.bug_type)?.label ?? form.bug_type}
-Page       : ${form.page || currentPage}
-URL        : ${window.location.href}
-Date/Heure : ${new Date().toLocaleString('fr-MA')}
+Type : ${BUG_TYPES.find(b => b.value === form.bug_type)?.label ?? form.bug_type}
+Page : ${form.page || currentPage}
+URL  : ${window.location.href}
+Date : ${new Date().toLocaleString('fr-MA')}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 DESCRIPTION
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ${form.description}
-
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Ticket généré depuis acx.ma
-    `.trim()
+      `.trim()
+    }
 
-    const subject = `[ACX${form.urgent ? ' 🚨 URGENT' : ''}] ${BUG_TYPES.find(b => b.value === form.bug_type)?.label} — ${user?.school_name ?? 'Inconnu'}`
-    const mailto  = `mailto:support@acx.ma?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
-    window.location.href = mailto
-
-    setTimeout(() => { setSending(false); setStep('sent') }, 1000)
+    try {
+      // 2. Envoyer la requête à Web3Forms
+      const response = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json", 
+          "Accept": "application/json" 
+        },
+        body: JSON.stringify(formData),
+      })
+      
+      const result = await response.json()
+      
+      if (result.success) {
+        // 3. Succès : afficher l'écran de confirmation
+        setTimeout(() => { 
+          setSending(false)
+          setStep('sent') 
+        }, 1000)
+      } else {
+        alert("Erreur lors de l'envoi. Veuillez réessayer ou utiliser WhatsApp.")
+        setSending(false)
+      }
+    } catch (err) {
+      console.error(err)
+      alert("Erreur de connexion. Vérifiez votre internet.")
+      setSending(false)
+    }
   }
 
   const inputStyle: React.CSSProperties = {
@@ -167,7 +189,7 @@ Ticket généré depuis acx.ma
                 </div>
                 <div>
                   <div style={{ fontSize: '13px', fontWeight: 700, color: '#166534' }}>Support urgent WhatsApp</div>
-                  <div style={{ fontSize: '11px', color: '#16A34A', marginTop: '1px' }}>+212 6 00 00 00 00 · Réponse immédiate</div>
+                  <div style={{ fontSize: '11px', color: '#16A34A', marginTop: '1px' }}>+212 6 34 23 20 06 · Réponse immédiate</div>
                 </div>
                 <i className="ti ti-external-link" style={{ color: '#86EFAC', fontSize: '14px', marginLeft: 'auto' }} />
               </a>
@@ -350,7 +372,7 @@ Ticket généré depuis acx.ma
 
           {/* Footer */}
           <div style={{ padding: '8px 16px', background: '#F8FAFC', borderTop: '1px solid #E2E8F0', fontSize: '10px', color: '#94A3B8', textAlign: 'center' }}>
-            ACX Support · support@acx.ma · +212 6 00 00 00 00
+            ACX Support · support@acx.ma · +212 6 34 23 20 06
           </div>
         </div>
       )}
