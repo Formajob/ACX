@@ -25,9 +25,9 @@ const STATUS_CONFIG: Record<string, { label: string; bg: string; color: string }
 }
 
 const TAG_COLORS = {
-  travail: { label: 'Travail',  color: '#166534', bg: '#DCFCE7', rgb: [22, 163, 74]  as [number, number, number] },
-  pause:   { label: 'Pause',    color: '#92400E', bg: '#FFFBEB', rgb: [217, 119, 6]  as [number, number, number] },
-  reunion: { label: 'Reunion',  color: '#4C1D95', bg: '#F5F3FF', rgb: [124, 58, 237] as [number, number, number] },
+  travail: { label: 'Travail',  color: '#166534', bg: '#DCFCE7', rgb: [22, 163, 74]  as [number, number, number], gradient: ['#22c55e', '#16a34a'] },
+  pause:   { label: 'Pause',    color: '#92400E', bg: '#FFFBEB', rgb: [217, 119, 6]  as [number, number, number], gradient: ['#f59e0b', '#d97706'] },
+  reunion: { label: 'Reunion',  color: '#4C1D95', bg: '#F5F3FF', rgb: [124, 58, 237] as [number, number, number], gradient: ['#8b5cf6', '#7c3aed'] },
 }
 
 function formatDuration(ms: number | null) {
@@ -59,7 +59,6 @@ function getWorkDuration(events: Event[]) {
   return Math.max(0, end - start - pauseTime)
 }
 
-// Present inclut desormais la reunion : present = effectif (tout le temps hors pause)
 function getTagDurations(events: Event[]) {
   let pauseMs = 0
   events.filter(e => e.event_type === 'pause_debut').forEach(p => {
@@ -74,7 +73,7 @@ function getTagDurations(events: Event[]) {
     if (rEnd) reunionMs += new Date(rEnd.timestamp).getTime() - rStart
   })
   const effectifMs = getWorkDuration(events)
-  const presentMs = effectifMs // present = effectif, inclut la reunion
+  const presentMs = effectifMs
   return { effectifMs, presentMs, pauseMs, reunionMs }
 }
 
@@ -88,9 +87,7 @@ function getDepartTime(events: Event[]) {
   return e ? new Date(e.timestamp).toLocaleTimeString('fr-MA', { hour: '2-digit', minute: '2-digit' }) : '-'
 }
 
-// --- Graphique repartition du temps ---
-// Segments mutuellement exclusifs pour un empilement visuel correct :
-// Travail (= present hors reunion) + Reunion + Pause. Leur somme = effectif + pause.
+// ── GRAPHIQUE ÉLÉGANT ──
 interface ChartRow { name: string; effectifMs: number; pauseMs: number; reunionMs: number }
 
 function TagDistributionChart({ rows }: { rows: ChartRow[] }) {
@@ -99,44 +96,131 @@ function TagDistributionChart({ rows }: { rows: ChartRow[] }) {
   }
 
   const maxTotal = Math.max(...rows.map(r => r.effectifMs + r.pauseMs), 1)
-  const rowHeight = 34
-  const barMaxWidth = 560
-  const labelWidth = 140
-  const svgHeight = rows.length * rowHeight + 20
-  const svgWidth = labelWidth + barMaxWidth + 20
+  const barMaxWidth = 100 // percentage
 
   return (
-    <div>
-      <svg viewBox={`0 0 ${svgWidth} ${svgHeight}`} style={{ width: '100%', height: 'auto', fontFamily: 'DM Sans, sans-serif' }}>
+    <div style={{ fontFamily: 'DM Sans, sans-serif' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
         {rows.map((r, i) => {
           const travailMs = Math.max(0, r.effectifMs - r.reunionMs)
           const total = r.effectifMs + r.pauseMs
-          const scale = total > 0 ? (barMaxWidth * (total / maxTotal)) / total : 0
-          const wTravail = travailMs * scale
-          const wReunion = r.reunionMs * scale
-          const wPause = r.pauseMs * scale
-          const y = i * rowHeight + 8
+          const percentage = (total / maxTotal) * 100
+          const travailPct = (travailMs / total) * percentage
+          const reunionPct = (r.reunionMs / total) * percentage
+          const pausePct = (r.pauseMs / total) * percentage
 
           return (
-            <g key={r.name}>
-              <text x={0} y={y + 14} fontSize="11" fill="#475569">
-                {r.name.length > 18 ? r.name.slice(0, 17) + '…' : r.name}
-              </text>
-              <rect x={labelWidth} y={y} width={barMaxWidth} height={20} rx={4} fill="#F1F5F9" />
-              <rect x={labelWidth} y={y} width={wTravail} height={20} fill={TAG_COLORS.travail.color} />
-              <rect x={labelWidth + wTravail} y={y} width={wReunion} height={20} fill={TAG_COLORS.reunion.color} />
-              <rect x={labelWidth + wTravail + wReunion} y={y} width={wPause} height={20} fill={TAG_COLORS.pause.color} />
-              <text x={labelWidth + barMaxWidth + 8} y={y + 14} fontSize="10" fill="#94A3B8">
+            <div key={r.name} style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              {/* Nom */}
+              <div style={{ width: '160px', flexShrink: 0 }}>
+                <div style={{ fontSize: '13px', fontWeight: 500, color: '#1E293B', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {r.name}
+                </div>
+              </div>
+
+              {/* Barre de progression */}
+              <div style={{ flex: 1, position: 'relative' }}>
+                <div style={{ 
+                  height: '32px', 
+                  background: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)',
+                  borderRadius: '12px',
+                  overflow: 'hidden',
+                  position: 'relative',
+                  boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.06)',
+                }}>
+                  {/* Travail */}
+                  <div style={{
+                    position: 'absolute',
+                    left: 0,
+                    top: 0,
+                    height: '100%',
+                    width: `${travailPct}%`,
+                    background: `linear-gradient(135deg, ${TAG_COLORS.travail.gradient[0]} 0%, ${TAG_COLORS.travail.gradient[1]} 100%)`,
+                    transition: 'width 0.6s ease',
+                    boxShadow: '0 0 10px rgba(34, 197, 94, 0.3)',
+                  }} />
+                  
+                  {/* Reunion */}
+                  <div style={{
+                    position: 'absolute',
+                    left: `${travailPct}%`,
+                    top: 0,
+                    height: '100%',
+                    width: `${reunionPct}%`,
+                    background: `linear-gradient(135deg, ${TAG_COLORS.reunion.gradient[0]} 0%, ${TAG_COLORS.reunion.gradient[1]} 100%)`,
+                    transition: 'width 0.6s ease',
+                    boxShadow: '0 0 10px rgba(139, 92, 246, 0.3)',
+                  }} />
+                  
+                  {/* Pause */}
+                  <div style={{
+                    position: 'absolute',
+                    left: `${travailPct + reunionPct}%`,
+                    top: 0,
+                    height: '100%',
+                    width: `${pausePct}%`,
+                    background: `linear-gradient(135deg, ${TAG_COLORS.pause.gradient[0]} 0%, ${TAG_COLORS.pause.gradient[1]} 100%)`,
+                    transition: 'width 0.6s ease',
+                    boxShadow: '0 0 10px rgba(245, 158, 11, 0.3)',
+                  }} />
+                </div>
+                
+                {/* Effet de brillance */}
+                <div style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: '50%',
+                  background: 'linear-gradient(to bottom, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 100%)',
+                  borderRadius: '12px 12px 0 0',
+                  pointerEvents: 'none',
+                }} />
+              </div>
+
+              {/* Total */}
+              <div style={{ 
+                width: '70px', 
+                textAlign: 'right',
+                fontSize: '13px', 
+                fontWeight: 600,
+                color: '#475569',
+                flexShrink: 0,
+              }}>
                 {formatTotal(total)}
-              </text>
-            </g>
+              </div>
+            </div>
           )
         })}
-      </svg>
-      <div style={{ display: 'flex', gap: '16px', marginTop: '12px', justifyContent: 'center' }}>
+      </div>
+
+      {/* Légende élégante */}
+      <div style={{ 
+        display: 'flex', 
+        gap: '24px', 
+        marginTop: '24px', 
+        justifyContent: 'center',
+        padding: '16px 24px',
+        background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
+        borderRadius: '12px',
+        border: '1px solid #e2e8f0',
+      }}>
         {Object.values(TAG_COLORS).map(t => (
-          <div key={t.label} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#64748B' }}>
-            <span style={{ width: '10px', height: '10px', borderRadius: '3px', background: t.color, display: 'inline-block' }} />
+          <div key={t.label} style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '10px', 
+            fontSize: '13px', 
+            color: '#475569',
+            fontWeight: 500,
+          }}>
+            <div style={{ 
+              width: '20px', 
+              height: '20px', 
+              borderRadius: '6px',
+              background: `linear-gradient(135deg, ${t.gradient[0]} 0%, ${t.gradient[1]} 100%)`,
+              boxShadow: `0 2px 4px rgba(${t.rgb.join(',')}, 0.3)`,
+            }} />
             {t.label}
           </div>
         ))}
@@ -513,14 +597,15 @@ export default function RapportPointage({ teachers }: Props) {
       </div>
 
       {/* Graphique repartition du temps */}
-      <div style={{ background: '#fff', border: '1px solid #E2E8F0', borderRadius: '12px', padding: '1.25rem', marginBottom: '1.25rem' }}>
-        <div style={{ fontSize: '13px', fontWeight: 600, color: '#1E293B', marginBottom: '1rem' }}>
+      <div style={{ background: '#fff', border: '1px solid #E2E8F0', borderRadius: '12px', padding: '1.5rem', marginBottom: '1.25rem', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+        <div style={{ fontSize: '14px', fontWeight: 600, color: '#1E293B', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <i className="ti ti-chart-bar" style={{ color: '#2563EB' }} />
           Repartition du temps {filterTeacher === 'tous' ? 'par professeur' : ''}
         </div>
         <TagDistributionChart rows={chartRows} />
       </div>
 
-      {/* Totaux par professeur — seulement si periode > 1 jour, sinon doublon avec le tableau detail */}
+      {/* Totaux par professeur */}
       {filterTeacher === 'tous' && perTeacherTotals.length > 0 && isMultiDay && (
         <div style={{ background: '#fff', border: '1px solid #E2E8F0', borderRadius: '12px', overflow: 'hidden', marginBottom: '1.25rem' }}>
           <div style={{ padding: '12px 16px', borderBottom: '1px solid #E2E8F0', fontSize: '13px', fontWeight: 600, color: '#1E293B' }}>
@@ -552,7 +637,7 @@ export default function RapportPointage({ teachers }: Props) {
         </div>
       )}
 
-      {/* Tableau detail (unique) */}
+      {/* Tableau detail */}
       <div style={{ background: '#fff', border: '1px solid #E2E8F0', borderRadius: '12px', overflow: 'hidden' }}>
         {loading ? (
           <div style={{ textAlign: 'center', padding: '3rem', color: '#94A3B8', fontSize: '14px' }}>Chargement...</div>
