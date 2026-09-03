@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 
 const BUG_TYPES = [
   { value: 'bug',        label: 'Bug / Erreur technique',     icon: 'ti-bug'           },
@@ -20,12 +20,41 @@ const PAGES = [
   'Portail parent', 'Espace professeur', 'Login', 'Autre',
 ]
 
+type SupportUser = {
+  full_name?: string
+  email?: string
+  role?: string
+  school_name?: string
+}
+
+const getCurrentPageFromPath = () => {
+  if (typeof window === 'undefined') return 'Autre'
+
+  const path = window.location.pathname
+  if (path.includes('eleves')) return 'Élèves'
+  if (path.includes('notes')) return 'Notes & Bulletins'
+  if (path.includes('absences')) return 'Absences'
+  if (path.includes('paiements')) return 'Paiements'
+  if (path.includes('emplois')) return 'Emplois du temps'
+  if (path.includes('presence')) return 'Pointage profs'
+  if (path.includes('classes')) return 'Classes'
+  if (path.includes('observations')) return 'Observations'
+  if (path.includes('annonces')) return 'Annonces'
+  if (path.includes('depenses')) return 'Dépenses'
+  if (path.includes('rapports')) return 'Rapports'
+  if (path.includes('parametres')) return 'Paramètres'
+  if (path.includes('parent')) return 'Portail parent'
+  if (path.includes('professeur')) return 'Espace professeur'
+  if (path.includes('dashboard')) return 'Tableau de bord'
+  return 'Autre'
+}
+
 export default function SupportWidget() {
-  const [open,       setOpen]       = useState(false)
-  const [step,       setStep]       = useState<'menu' | 'ticket' | 'sent'>('menu')
-  const [sending,    setSending]    = useState(false)
-  const [user,       setUser]       = useState<any>(null)
-  const [currentPage, setCurrentPage] = useState('')
+  const [open, setOpen] = useState(false)
+  const [step, setStep] = useState<'menu' | 'ticket' | 'sent'>('menu')
+  const [sending, setSending] = useState(false)
+  const [user, setUser] = useState<SupportUser | null>(null)
+  const [currentPage, setCurrentPage] = useState('Autre')
 
   const [form, setForm] = useState({
     bug_type:    '',
@@ -33,31 +62,6 @@ export default function SupportWidget() {
     description: '',
     urgent:      false,
   })
-
-  useEffect(() => {
-    // Récupérer l'utilisateur connecté
-    const stored = localStorage.getItem('acx_user')
-    if (stored) setUser(JSON.parse(stored))
-
-    // Détecter la page actuelle
-    const path = window.location.pathname
-    if (path.includes('eleves'))       setCurrentPage('Élèves')
-    else if (path.includes('notes'))   setCurrentPage('Notes & Bulletins')
-    else if (path.includes('absences'))setCurrentPage('Absences')
-    else if (path.includes('paiements'))setCurrentPage('Paiements')
-    else if (path.includes('emplois')) setCurrentPage('Emplois du temps')
-    else if (path.includes('presence'))setCurrentPage('Pointage profs')
-    else if (path.includes('classes')) setCurrentPage('Classes')
-    else if (path.includes('observations'))setCurrentPage('Observations')
-    else if (path.includes('annonces'))setCurrentPage('Annonces')
-    else if (path.includes('depenses'))setCurrentPage('Dépenses')
-    else if (path.includes('rapports'))setCurrentPage('Rapports')
-    else if (path.includes('parametres'))setCurrentPage('Paramètres')
-    else if (path.includes('parent'))  setCurrentPage('Portail parent')
-    else if (path.includes('professeur'))setCurrentPage('Espace professeur')
-    else if (path.includes('dashboard'))setCurrentPage('Tableau de bord')
-    else setCurrentPage('Autre')
-  }, [])
 
   function resetForm() {
     setForm({ bug_type: '', page: currentPage, description: '', urgent: false })
@@ -75,6 +79,9 @@ export default function SupportWidget() {
       parent: 'Parent',
     }
 
+    const userRole = user?.role
+    const userRoleLabel = userRole ? (roleLabel[userRole] ?? userRole) : '—'
+
     // 1. Préparer les données pour Web3Forms
     const formData = {
       access_key: "a037a697-b706-4e18-a945-3a1b664ea8e2", // ⚠️ Remplace par ta clé obtenue à l'étape 1
@@ -88,7 +95,7 @@ URGENCE : ${form.urgent ? '🚨 OUI' : '🟢 Non'}
 UTILISATEUR
 Nom   : ${user?.full_name ?? 'Non connecté'}
 Email : ${user?.email ?? '—'}
-Rôle  : ${roleLabel[user?.role] ?? user?.role ?? '—'}
+Rôle  : ${userRoleLabel}
 École : ${user?.school_name ?? '—'}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -145,16 +152,71 @@ ${form.description}
     <>
       {/* ── BOUTON FLOTTANT ── */}
       <button
-        onClick={() => { setOpen(!open); if (!open) { setStep('menu'); setForm(p => ({ ...p, page: currentPage })) } }}
+        onClick={() => {
+          const nextOpen = !open
+          setOpen(nextOpen)
+
+          if (nextOpen) {
+            setStep('menu')
+
+            const storedUser = typeof window !== 'undefined' ? localStorage.getItem('acx_user') : null
+            if (storedUser) {
+              try {
+                setUser(JSON.parse(storedUser) as SupportUser)
+              } catch {
+                setUser(null)
+              }
+            } else {
+              setUser(null)
+            }
+
+            const page = getCurrentPageFromPath()
+            setCurrentPage(page)
+            setForm(p => ({ ...p, page }))
+          }
+        }}
         title="Support & Assistance"
-        style={{ position: 'fixed', bottom: '24px', right: '24px', width: '52px', height: '52px', borderRadius: '50%', background: open ? '#EF4444' : '#2563EB', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '22px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 6px 24px rgba(37,99,235,0.45)', zIndex: 1000, transition: 'all 0.2s' }}
+        style={{
+          position: 'fixed',
+          bottom: '24px',
+          right: '24px',
+          width: '52px',
+          height: '52px',
+          borderRadius: '50%',
+          background: open ? '#EF4444' : '#2563EB',
+          color: '#fff',
+          border: 'none',
+          cursor: 'pointer',
+          fontSize: '22px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxShadow: '0 6px 24px rgba(37,99,235,0.45)',
+          zIndex: 1000,
+          transition: 'all 0.25s ease',
+          transform: open ? 'scale(0.96)' : 'scale(1)',
+          animation: open ? 'supportButtonPulse 0.4s ease' : 'supportFloat 3.2s ease-in-out infinite',
+        }}
       >
         <i className={'ti ' + (open ? 'ti-x' : 'ti-headset')} />
       </button>
 
       {/* ── PANEL ── */}
       {open && (
-        <div style={{ position: 'fixed', bottom: '88px', right: '24px', width: '340px', background: '#fff', borderRadius: '16px', boxShadow: '0 20px 60px rgba(0,0,0,0.2)', zIndex: 1000, overflow: 'hidden', fontFamily: 'DM Sans, sans-serif' }}>
+        <div style={{
+          position: 'fixed',
+          bottom: '88px',
+          right: '24px',
+          width: '340px',
+          background: '#fff',
+          borderRadius: '16px',
+          boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
+          zIndex: 1000,
+          overflow: 'hidden',
+          fontFamily: 'DM Sans, sans-serif',
+          animation: 'supportPanelIn 0.24s cubic-bezier(0.22, 1, 0.36, 1)',
+          transformOrigin: 'bottom right',
+        }}>
 
           {/* Header */}
           <div style={{ background: 'linear-gradient(135deg, #172554, #1E3A8A)', padding: '16px 18px' }}>
@@ -290,7 +352,7 @@ ${form.description}
                     value={form.description}
                     onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
                     rows={4}
-                    placeholder="Décrivez le problème en détail — ce que vous faisiez, ce qui s'est passé, le message d'erreur si applicable..."
+                    placeholder="Décrivez le problème en détail — ce que vous faisiez, ce qui s&apos;est passé, le message d&apos;erreur si applicable..."
                     style={{ ...inputStyle, resize: 'vertical' as const, fontSize: '13px' }}
                   />
                 </div>
@@ -309,7 +371,7 @@ ${form.description}
                       Marquer comme urgent
                     </div>
                     <div style={{ fontSize: '10px', color: '#94A3B8', marginTop: '1px' }}>
-                      Bloque l'utilisation de la plateforme
+                      Bloque l&apos;utilisation de la plateforme
                     </div>
                   </div>
                 </div>
@@ -320,7 +382,7 @@ ${form.description}
                   <div>👤 {user?.full_name ?? 'Non connecté'} · {user?.role ?? '—'}</div>
                   <div>🏫 {user?.school_name ?? '—'}</div>
                   <div>📍 {form.page || currentPage}</div>
-                  <div>🕐 {new Date().toLocaleString('fr-MA')}</div>
+                  <div>🕐 Date ajoutée au moment de l&apos;envoi</div>
                 </div>
 
                 {/* Bouton envoi */}
@@ -379,6 +441,25 @@ ${form.description}
 
       <style>{`
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes supportFloat {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-6px); }
+        }
+        @keyframes supportButtonPulse {
+          0% { transform: scale(0.9); }
+          50% { transform: scale(1.08); }
+          100% { transform: scale(1); }
+        }
+        @keyframes supportPanelIn {
+          0% {
+            opacity: 0;
+            transform: translateY(16px) scale(0.96);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
       `}</style>
     </>
   )

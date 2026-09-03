@@ -388,7 +388,7 @@ export default function NotesPage() {
       doc.text('Signature du Parent', pageW / 2, sigY, { align: 'center' })
       doc.line(pageW / 2 - 30, sigY + 13, pageW / 2 + 30, sigY + 13)
       doc.text('Cachet établissement', pageW - 20, sigY, { align: 'right' })
-      doc.roundedRect(pageW - 58, sigY + 1, 44, 14, 2, 2)
+      doc.roundedRect(pageW - 58, sigY + 1, 44, 14, 2, 2, 'S')
 
       // ── PIED DE PAGE ──
       doc.setFillColor(23, 37, 84)

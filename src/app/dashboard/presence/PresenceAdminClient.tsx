@@ -10,9 +10,11 @@ interface Attendance {
   id: string
   status: string
   date: string
+  teacher_id: string        // ← ajouter cette ligne
   users: { full_name: string } | null
   teacher_attendance_events: Event[]
 }
+
 interface Alert {
   id: string
   type: string
@@ -153,11 +155,8 @@ export default function PresenceAdminClient({ teachers, todayAttendances: initia
   }, [supabase, calibrate])
 
   function getTeacherAttendance(teacherId: string) {
-    return attendances.find(a => {
-      const t = teachers.find(t => t.id === teacherId)
-      return a.users?.full_name === t?.full_name
-    })
-  }
+  return attendances.find(a => a.teacher_id === teacherId)
+}
 
   function getTeacherStatus(teacherId: string) {
     const att = getTeacherAttendance(teacherId)
