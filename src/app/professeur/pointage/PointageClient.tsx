@@ -24,6 +24,8 @@ interface Props {
   history: Attendance[]
 }
 
+const EMPTY_EVENTS: Event[] = []
+
 const EVENT_CONFIG: Record<string, { label: string; icon: string; bg: string; color: string; border: string }> = {
   arrive:        { label: 'Arrivee',       icon: 'ti-login',        bg: '#ECFDF5', color: '#166534', border: '#86EFAC' },
   pause_debut:   { label: 'Debut pause',   icon: 'ti-coffee',       bg: '#FFFBEB', color: '#92400E', border: '#FDE68A' },
@@ -70,12 +72,24 @@ export default function PointageClient({ teacherId, todayAttendance, history }: 
   const [elapsed, setElapsed] = useState(0)
   const [tab, setTab] = useState<'today' | 'history'>('today')
 
-  const events = attendance?.teacher_attendance_events ?? []
+  const events = attendance?.teacher_attendance_events ?? EMPTY_EVENTS
   const lastEvent = events.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()).at(-1)
   const hasArrived = events.some(e => e.event_type === 'arrive')
   const hasDeparted = events.some(e => e.event_type === 'depart')
   const isOnPause = events.filter(e => e.event_type === 'pause_debut').length > events.filter(e => e.event_type === 'pause_fin').length
   const isInMeeting = events.filter(e => e.event_type === 'reunion_debut').length > events.filter(e => e.event_type === 'reunion_fin').length
+
+  useEffect(() => {
+    if (!hasArrived || hasDeparted) return
+
+    const updateElapsed = () => {
+      setElapsed(getWorkDuration(events) ?? 0)
+    }
+
+    const interval = window.setInterval(updateElapsed, 1000)
+
+    return () => window.clearInterval(interval)
+  }, [events, hasArrived, hasDeparted])
 
   // Presence: signale que le prof a l'app ouverte
 useEffect(() => {
@@ -199,6 +213,9 @@ useEffect(() => {
 
   const availableActions = getAvailableActions()
   const workDuration = getWorkDuration(events)
+  const displayedElapsed = hasArrived && !hasDeparted
+    ? Math.max(elapsed, workDuration ?? 0)
+    : elapsed
 
   const statusInfo = hasDeparted
     ? { label: 'Parti', bg: '#FEF2F2', color: '#DC2626' }
@@ -240,7 +257,7 @@ useEffect(() => {
                   Temps de travail effectif
                 </div>
                 <div style={{ fontSize: '38px', fontWeight: 600, color: '#0F172A', fontVariantNumeric: 'tabular-nums', letterSpacing: '-1px' }}>
-                  {formatDuration(hasDeparted && workDuration ? workDuration : elapsed)}
+                  {formatDuration(hasDeparted && workDuration ? workDuration : displayedElapsed)}
                 </div>
                 {isOnPause && (
                   <div style={{ fontSize: '12px', color: '#92400E', marginTop: '6px', background: '#FFFBEB', padding: '3px 10px', borderRadius: '20px', display: 'inline-block' }}>
