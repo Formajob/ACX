@@ -178,7 +178,6 @@ export default function ClassesPage() {
       // Créer
       const { error: err } = await supabase.from('users').insert({
         school_id:   schoolId,
-        school_name: classes[0]?.users?.full_name ?? '',
         role:        'teacher',
         full_name:   profForm.full_name.trim(),
         email:       profForm.email.trim().toLowerCase(),

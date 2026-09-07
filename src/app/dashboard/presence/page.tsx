@@ -1,7 +1,9 @@
 import { createClient } from '@/lib/supabase-server'
+import { connection } from 'next/server'
 import PresenceAdminWrapper from './PresenceAdminWrapper'
 
 export default async function PresenceAdminPage() {
+  await connection()
   const supabase = await createClient()
   const today = new Date().toISOString().split('T')[0]
 

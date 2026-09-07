@@ -41,8 +41,6 @@ const EVENT_CONFIG: Record<string, { label: string; icon: string; color: string;
 
 const ADMIN_TAG_OPTIONS = ['arrive', 'pause_debut', 'pause_fin', 'reunion_debut', 'reunion_fin', 'depart']
 
-const CALIBRATION_WINDOW_MS = 5 * 60 * 1000
-
 function formatDuration(ms: number) {
   const clamped = Math.max(0, ms)
   const h = Math.floor(clamped / 3600000)
@@ -85,30 +83,20 @@ export default function PresenceAdminClient({ teachers, todayAttendances: initia
   const [onlineIds, setOnlineIds] = useState<Set<string>>(new Set())
   const [tagMenuOpen, setTagMenuOpen] = useState<string | null>(null)
   const [changingTag, setChangingTag] = useState<string | null>(null)
-  const [lastSync, setLastSync] = useState<number>(Date.now())
+  const [now, setNow] = useState(0)
+  const [lastSync, setLastSync] = useState(0)
 
-  // --- Horloge recalee sur le serveur (corrige le bug du timer negatif) ---
-  const [serverOffset, setServerOffset] = useState(0)
-  const [, setTick] = useState(0)
+  // --- Horloge locale: les compteurs sont calcules depuis les timestamps en base ---
   useEffect(() => {
-    const id = setInterval(() => setTick(t => t + 1), 1000)
-    return () => clearInterval(id)
-  }, [])
-  const now = Date.now() + serverOffset
-
-  const calibrate = useCallback((serverTimestampISO: string) => {
-    const drift = new Date(serverTimestampISO).getTime() - Date.now()
-    setServerOffset(drift)
-    setLastSync(Date.now())
-  }, [])
-
-  useEffect(() => {
-    let latest: string | null = null
-    attendances.forEach(a => a.teacher_attendance_events?.forEach(e => {
-      if (!latest || new Date(e.timestamp).getTime() > new Date(latest).getTime()) latest = e.timestamp
-    }))
-    if (latest && Date.now() - new Date(latest).getTime() < CALIBRATION_WINDOW_MS) calibrate(latest)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const start = window.setTimeout(() => {
+      setNow(Date.now())
+      setLastSync(Date.now())
+    }, 0)
+    const id = window.setInterval(() => setNow(Date.now()), 1000)
+    return () => {
+      window.clearTimeout(start)
+      window.clearInterval(id)
+    }
   }, [])
 
   // --- Presence: qui a l'app ouverte ---
@@ -137,7 +125,6 @@ export default function PresenceAdminClient({ teachers, todayAttendances: initia
         { event: 'INSERT', schema: 'public', table: 'teacher_attendance_events' },
         (payload) => {
           const newEvent = payload.new as Event & { teacher_attendance_id: string }
-          calibrate(newEvent.timestamp)
           setAttendances(prev => prev.map(a =>
             a.id === newEvent.teacher_attendance_id
               ? {
@@ -152,7 +139,7 @@ export default function PresenceAdminClient({ teachers, todayAttendances: initia
       )
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [supabase, calibrate])
+  }, [supabase])
 
   function getTeacherAttendance(teacherId: string) {
   return attendances.find(a => a.teacher_id === teacherId)
@@ -238,7 +225,7 @@ export default function PresenceAdminClient({ teachers, todayAttendances: initia
         .select()
         .single()
 
-      calibrate(newEvent.timestamp)
+      setLastSync(Date.now())
 
       setAttendances(prev => prev.map(a =>
         a.id === att!.id
@@ -258,7 +245,7 @@ export default function PresenceAdminClient({ teachers, todayAttendances: initia
       setChangingTag(null)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [teachers, supabase, attendances, calibrate])
+  }, [teachers, supabase, attendances])
 
   const FILTERS: { key: FilterKey; label: string; icon: string }[] = [
     { key: 'tous',    label: 'Tous',       icon: 'ti-users' },
@@ -277,7 +264,7 @@ export default function PresenceAdminClient({ teachers, todayAttendances: initia
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <i className="ti ti-clock" style={{ fontSize: '18px', color: '#2563EB' }} />
           <span style={{ fontSize: '16px', fontWeight: 600, fontFamily: 'Syne, sans-serif', color: '#0F172A' }}>
-            Presence de l'equipe (Temps reel)
+            Presence de l&apos;equipe (Temps reel)
           </span>
         </div>
         <div style={{ fontSize: '13px', color: '#64748B' }}>{teachers.length} membres</div>
@@ -322,7 +309,7 @@ export default function PresenceAdminClient({ teachers, todayAttendances: initia
           ))}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '12px', color: '#94A3B8' }}>
-          <span>Mis a jour a {new Date(lastSync).toLocaleTimeString('fr-MA', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
+          <span>{now > 0 ? `Mis a jour a ${new Date(lastSync).toLocaleTimeString('fr-MA', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}` : 'Synchronisation...'}</span>
           <button
             onClick={() => router.refresh()}
             style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', border: '1px solid #E2E8F0', borderRadius: '8px', background: '#fff', color: '#1E293B', fontSize: '12px', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}
@@ -344,10 +331,11 @@ export default function PresenceAdminClient({ teachers, todayAttendances: initia
               const att = getTeacherAttendance(teacher.id)
               const status = getTeacherStatus(teacher.id)
               const evts = att?.teacher_attendance_events ?? []
-              const dur = getWorkDuration(evts, now)
+              const dur = now > 0 ? getWorkDuration(evts, now) : null
               const currentTag = getCurrentTag(evts)
-              const tagCfg = currentTag ? EVENT_CONFIG[currentTag.event_type] : null
-              const tagSince = currentTag ? Math.max(0, now - new Date(currentTag.timestamp).getTime()) : null
+              const tagSince = now > 0 && currentTag && currentTag.event_type !== 'depart'
+                ? Math.max(0, now - new Date(currentTag.timestamp).getTime())
+                : null
               const isOnline = onlineIds.has(teacher.id)
 
               return (
@@ -396,7 +384,7 @@ export default function PresenceAdminClient({ teachers, todayAttendances: initia
 
                   <div style={{ background: '#EFF6FF', borderRadius: '9px', padding: '9px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
                     <span style={{ fontSize: '12px', color: '#1E3A8A' }}>
-                      {currentTag ? `Depuis ${new Date(currentTag.timestamp).toLocaleTimeString('fr-MA', { hour: '2-digit', minute: '2-digit' })}` : 'Pas encore pointe'}
+                      {currentTag ? `Depuis ${now > 0 ? new Date(currentTag.timestamp).toLocaleTimeString('fr-MA', { hour: '2-digit', minute: '2-digit' }) : '--:--'}` : 'Pas encore pointe'}
                     </span>
                     <span style={{ fontSize: '13px', fontWeight: 700, color: '#1E3A8A', fontVariantNumeric: 'tabular-nums' }}>
                       {tagSince !== null ? formatDuration(tagSince) : '-'}
